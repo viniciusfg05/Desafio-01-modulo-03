@@ -10,5 +10,57 @@
   .contentHome {
     width: 700px;
     margin: 0 auto;
+    margin-top: 1.5rem;
+    text-align: left;
+
+    > strong{
+      margin-bottom: 0.3rem;
+      font-size: 1.75rem;
+      font-family: "Inter" sans-serif;
+      font-weight: 700;
+    }
+
+    p{
+      font-size: 1.125rem;
+      color: var(--body);
+      font-family: "Inter" sans-serif;
+      font-weight: 400;
+    }
+
+    .info{
+      width: 263px;
+      color: var(--info);
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      
+
+      time{
+        display: flex;
+        text-align: center;
+        align-self: stretch;
+        align-items: center; 
+
+        .infoCalender{
+          font-size: 1.2rem;
+          margin-right: 0.5rem;
+        }
+      }
+
+      cite{
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-self: stretch;
+        align-items: center; 
+
+        .infoUser{
+          font-size: 1.2rem;
+          margin-right: 0.5rem;
+        }
+      }
+    }
   }
+
 }
