@@ -1,23 +1,16 @@
 import { GetStaticProps } from 'next';
-import Prismic from '@prismicio/client'
-import { getPrismicClient } from '../services/prismic';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import commonStyles from '../styles/common.module.scss';
-import styles from './home.module.scss';
-import { RichText } from 'prismic-dom';
-import Link from 'next/link';
 import { useState } from 'react';
+import { getPrismicClient } from '../services/prismic';
+
 import { FiUser } from 'react-icons/fi';
 import { AiOutlineCalendar } from 'react-icons/ai'
 
+import { ptBR } from 'date-fns/locale';
+import { format } from 'date-fns';
 
-interface BodyContentProps{
-  body: {
-    type: string;
-    text: string;
-  }
-}
+import styles from './home.module.scss';
+import Prismic from '@prismicio/client'
+import Link from 'next/link';
 
 interface Post {
   uid?: string;
@@ -33,6 +26,15 @@ interface Post {
       }[];
     }[];
   };
+}
+
+interface ContentProp {
+  content: {
+    heading: string;
+    body: {
+      text: string;
+    }[];
+  }[];
 }
 
 interface PostPagination {
@@ -67,49 +69,43 @@ export default function Home({postsPagination}: HomeProps) {
 
   const [ posts, setPosts ] = useState<Post[]>(formattedPost)
 
+
   return (
+    
+
+
     <div className={styles.containerHome}>
-      <div className={styles.contentHome}>
         {posts.map(post => (
-          <div>
-            <strong>{post.data.title}</strong>
+          <Link key={post.uid} href={`/post/${post.uid}`}> 
+            <div className={styles.contentHome}>
+              <strong>{post.data.title}</strong>
 
-            {post.data.content.map(content => (
-              <p>{content.heading}</p>
-            ))}
-            
-
-
-            <div className={styles.info}>
-              <time><AiOutlineCalendar className={styles.infoCalender}/>  15 Mar 2021</time>
-              <cite>
-                <FiUser className={styles.infoUser}/>  Joseph Oliveira
-              </cite> 
+              {/* {console.log(JSON.stringify(post.data.content[0].body[0].text, null, 2))} */}
+              {/* <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore quisquam at accusamus velit aspernatur temporibus commodi ratione   fugit animi blanditiis, dicta quod nisi consectetur libero ipsam laudantium, nulla sed dolore?</p> */}
+              <div className={styles.info}>
+                <time><AiOutlineCalendar className={styles.infoCalender}/>{post.first_publication_date}</time>
+                <cite>
+                  <FiUser className={styles.infoUser}/>  { post.data.author }
+                </cite> 
+              </div>
+              <div className={styles.divide}/>
             </div>
-          </div>
+          </Link>
         ))}
-
-
-
-      </div>
-
     </div>
-
   )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   
-  const postsResponse = await prismic.query([
+  const postsResponse = await prismic.query<any>([
     Prismic.predicates.at('document.type', 'posts')
   ])
 
   const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
-
     // console.log(JSON.stringify(content[0].body, null, 2))
     // console.log('Bem sucedido')
-
     return {
       uid: resultPostPrismic.uid,
       first_publication_date: resultPostPrismic.first_publication_date,
@@ -120,7 +116,7 @@ export const getStaticProps: GetStaticProps = async () => {
         content: resultPostPrismic.data.content.map(content => {
           return {
             heading: content.heading,
-            body: [...content.body],
+            body: content.body,
           };
         }),
       },
@@ -132,7 +128,7 @@ export const getStaticProps: GetStaticProps = async () => {
     results: mapPostsResults
   }
 
-  // console.log(JSON.stringify(content, null, 2))
+  // console.log(JSON.stringify(mapPostsResults, null, 2))
 
   return {
     props: {

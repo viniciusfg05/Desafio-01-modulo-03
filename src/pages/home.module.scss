@@ -12,55 +12,66 @@
     margin: 0 auto;
     margin-top: 1.5rem;
     text-align: left;
+    cursor: pointer;
+    transition: 0.2s;
 
-    > strong{
-      margin-bottom: 0.3rem;
+    .divide {
+      border-bottom: 1px solid var(--borde-header);
+      margin: 2rem 0;
+    }
+
+    &:hover {
+      color: var(--pink);
+    }
+
+    strong {
+      display: block;
       font-size: 1.75rem;
-      font-family: "Inter" sans-serif;
+      font-family: 'Inter' sans-serif;
       font-weight: 700;
     }
 
-    p{
+    p {
+      margin-top: 0.5rem;
+
       font-size: 1.125rem;
-      color: var(--body);
-      font-family: "Inter" sans-serif;
+      color: var(--info);
+      font-family: 'Inter' sans-serif;
       font-weight: 400;
     }
 
-    .info{
+    .info {
       width: 263px;
       color: var(--info);
       margin-top: 1.5rem;
       font-size: 0.9rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      
 
-      time{
+      time {
         display: flex;
         text-align: center;
         align-self: stretch;
-        align-items: center; 
+        align-items: center;
 
-        .infoCalender{
+        .infoCalender {
           font-size: 1.2rem;
           margin-right: 0.5rem;
         }
       }
 
-      cite{
+      cite {
         display: flex;
         text-align: center;
         justify-content: center;
         align-self: stretch;
-        align-items: center; 
+        align-items: center;
 
-        .infoUser{
+        .infoUser {
           font-size: 1.2rem;
           margin-right: 0.5rem;
         }
       }
     }
   }
-
 }
