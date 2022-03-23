@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import styles from './home.module.scss';
 import Prismic from '@prismicio/client'
 import Link from 'next/link';
+import { RichText } from 'prismic-dom';
 
 interface Post {
   uid?: string;
@@ -78,10 +79,8 @@ export default function Home({postsPagination}: HomeProps) {
         {posts.map(post => (
           <Link key={post.uid} href={`/post/${post.uid}`}> 
             <div className={styles.contentHome}>
-              <strong>{post.data.title}</strong>
-
-              {/* {console.log(JSON.stringify(post.data.content[0].body[0].text, null, 2))} */}
-              {/* <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore quisquam at accusamus velit aspernatur temporibus commodi ratione   fugit animi blanditiis, dicta quod nisi consectetur libero ipsam laudantium, nulla sed dolore?</p> */}
+              <strong>{post.data.title}</strong>  
+              {<p>{post.data.content[0].body}</p>}
               <div className={styles.info}>
                 <time><AiOutlineCalendar className={styles.infoCalender}/>{post.first_publication_date}</time>
                 <cite>
@@ -99,7 +98,7 @@ export default function Home({postsPagination}: HomeProps) {
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   
-  const postsResponse = await prismic.query<any>([
+  const postsResponse = await prismic.query([
     Prismic.predicates.at('document.type', 'posts')
   ])
 
@@ -116,7 +115,7 @@ export const getStaticProps: GetStaticProps = async () => {
         content: resultPostPrismic.data.content.map(content => {
           return {
             heading: content.heading,
-            body: content.body,
+            body: RichText.asText(content.body).substr(0, 100),
           };
         }),
       },
@@ -128,7 +127,7 @@ export const getStaticProps: GetStaticProps = async () => {
     results: mapPostsResults
   }
 
-  // console.log(JSON.stringify(mapPostsResults, null, 2))
+  console.log(JSON.stringify(postsPagination, null, 2))
 
   return {
     props: {
