@@ -12,6 +12,7 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
 interface Post {
+  uid?: string;
   first_publication_date: string | null;
   data: {
     title: string;
@@ -29,83 +30,71 @@ interface Post {
 }
 
 interface PostProps {
-  results: Post[];
+  resultsPosts: Post;
 }
 
-  export default function Post( resultsPosts:PostProps ) {
-    const formattedPost = resultsPosts.results.map(post => {
-      // const readTime = getReadTime(post);
-  
-      return {
-        ...post,
-        data: {
-          ...post.data,
-        },
-        first_publication_date: format(
-          new Date(post.first_publication_date),
-          'dd MMM yyyy',
-          {
-            locale: ptBR,
-          }
-        ),
-      };
-    })
+export default function Post( {resultsPosts}:PostProps ) {
+  console.log(resultsPosts.data)
 
-    const [ posts, setPosts ] = useState<Post[]>(formattedPost)
 
-    return (
-      <div>
-        {posts.map(post => (
-          <p>{post.first_publication_date}</p>
-        ))}
-      </div>
-    )
-  }
 
-  export const getStaticPaths: GetStaticPaths = async () => {
-    const prismic = getPrismicClient();
-    const posts = await prismic.query([
-      Prismic.Predicates.at('document.type', 'posts'),
-    ]);
-  
-    const paths = posts.results.map(post => {
-      return {
-        params: {
-          slug: post.uid,
-        },
-      };
-    });
-  
-    return {
-      paths,
-      fallback: true,
-    };
-  };
+  return (
+    <>
+      {/* {resultsPosts.data.content.map(content => {
+        return(
+          <article key={content.heading}>{content.heading}</article>
+        )
+      })} */}
+    </>
+  )
+}
 
-  export async function getStaticProps({ params, previewData }) {
+export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient();
-  const { slug } = params;
-  const response = await prismic.getByUID('posts', String(slug), {})
+  const posts = await prismic.query([
+    Prismic.Predicates.at('document.type', 'posts'),
+  ]);
 
-
-  const posts = {
-    first_publication_date: response.first_publication_date,
-    data: {
-      title:  response.data.title,
-      banner: {
-        url: response.data.banner,
+  const paths = posts.results.map(post => {
+    return {
+      params: {
+        slug: post.uid,
       },
-      author: response.data.author,
-      content: response.data.content.map(content => {
-        return {
-          heading: content.heading,
-          body: RichText.asText(content.body),
-        };
-      }),
-    }
-  }
+    };
+  });
 
-  return {  
-    props: { resultsPosts: posts },
+  return {
+    paths,
+    fallback: true,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async context => {
+const prismic = getPrismicClient();
+const { slug } = context.params;
+const response = await prismic.getByUID<any>('posts', String(slug), {})
+
+const posts = {
+  uid: response.uid,
+  first_publication_date: response.first_publication_date,
+  data: {
+    title:  response.data.title,
+    banner: {
+      url: response.data.banner.url,
+    },
+    author: response.data.author,
+    content: response.data.content.map(content => {
+      return {
+        heading: content.heading,
+        body: [...content.body],
+      };
+    }),
   }
+}
+
+console.log(JSON.stringify(posts, null, 2))
+
+return {  
+  props: { resultsPosts: posts },
+}
 };
