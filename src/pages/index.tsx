@@ -66,10 +66,13 @@ export default function Home({postsPagination}: HomeProps) {
     };
   })
 
-
-
   const [ posts, setPosts ] = useState<Post[]>(formattedPost)
 
+
+  async function handleNextPage(): Promise<void> {
+    await fetch(postsPagination.next_page).then(res => res.json())
+    .then( data => setPosts([...posts, data]))
+  }
 
   return (
     <div className={styles.containerHome}>
@@ -77,7 +80,7 @@ export default function Home({postsPagination}: HomeProps) {
           <Link key={post.uid} href={`/post/${post.uid}`}> 
             <div className={styles.contentHome}>
               <strong>{post.data.title}</strong>  
-              {<p>{post.data.content[0].body}</p>}
+              {<p>{post.data.subtitle}</p>}
               <div className={styles.info}>
                 <time><AiOutlineCalendar className={styles.infoCalender}/>{post.first_publication_date}</time>
                 <cite>
@@ -88,6 +91,11 @@ export default function Home({postsPagination}: HomeProps) {
             </div>
           </Link>
         ))}
+        
+          <button onClick={handleNextPage}>
+            carrega mais
+          </button>
+
     </div>
   )
 }
@@ -95,9 +103,15 @@ export default function Home({postsPagination}: HomeProps) {
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   
-  const postsResponse = await prismic.query<any>([
-    Prismic.predicates.at('document.type', 'posts')
-  ])
+  const postsResponse = await prismic.query<any>(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 2,
+    }
+  );
+  
+
+  console.log(postsResponse)
 
   const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
     // console.log(JSON.stringify(content[0].body, null, 2))
@@ -112,7 +126,6 @@ export const getStaticProps: GetStaticProps = async () => {
         content: resultPostPrismic.data.content.map(content => {
           return {
             heading: content.heading,
-            body: RichText.asText(content.body).substr(0, 100),
           };
         }),
       },
