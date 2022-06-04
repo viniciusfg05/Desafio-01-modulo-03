@@ -29,35 +29,35 @@ interface Post {
 }
 
 interface PostProps {
-  results: Post[];
+  resultsPosts: Post[];
 }
 
-  export default function Post( resultsPosts:PostProps ) {
-    const formattedPost = resultsPosts.results.map(post => {
-      // const readTime = getReadTime(post);
+  export default function Post( { resultsPosts }: PostProps ) {
+    // const formattedPost = resultsPosts.map(post => {
+    //   // const readTime = getReadTime(post);
   
-      return {
-        ...post,
-        data: {
-          ...post.data,
-        },
-        first_publication_date: format(
-          new Date(post.first_publication_date),
-          'dd MMM yyyy',
-          {
-            locale: ptBR,
-          }
-        ),
-      };
-    })
+    //   return {
+    //     ...post,
+    //     data: {
+    //       ...post.data,
+    //     },
+    //     first_publication_date: format(
+    //       new Date(post.first_publication_date),
+    //       'dd MMM yyyy',
+    //       {
+    //         locale: ptBR,
+    //       }
+    //     ),
+    //   };
+    // })
 
-    const [ posts, setPosts ] = useState<Post[]>(formattedPost)
+    // const [ posts, setPosts ] = useState<Post[]>()
 
     return (
       <div>
-        {posts.map(post => (
-          <p>{post.first_publication_date}</p>
-        ))}
+        {/* {posts.map(post => ( */}
+          {/* <p>{post.first_publication_date}</p> */}
+        {/* ))} */}
       </div>
     )
   }
@@ -104,6 +104,9 @@ interface PostProps {
       }),
     }
   }
+
+  console.log(response)
+  console.log('posts')
 
   return {  
     props: { resultsPosts: posts },
