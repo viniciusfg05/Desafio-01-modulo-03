@@ -12,6 +12,7 @@ import styles from './home.module.scss';
 import Prismic from '@prismicio/client'
 import Link from 'next/link';
 import { RichText } from 'prismic-dom';
+import { asLink } from '@prismicio/react/node_modules/@prismicio/helpers';
 
 interface Post {
   uid?: string;
@@ -67,12 +68,15 @@ export default function Home({postsPagination}: HomeProps) {
   })
 
   const [ posts, setPosts ] = useState<Post[]>(formattedPost)
+  const [ nextPage, setNextPage ] = useState(postsPagination.next_page)
+  
 
 
-  async function handleNextPage(): Promise<void> {
-    await fetch(postsPagination.next_page).then(res => res.json())
-    .then( data => setPosts([...posts, data]))
-  }
+    async function handleNextPage(): Promise<void> {
+        await fetch(nextPage).then(res => res.json())
+        .then( data => setNextPage(data))
+
+    }
 
   return (
     <div className={styles.containerHome}>
@@ -92,7 +96,7 @@ export default function Home({postsPagination}: HomeProps) {
           </Link>
         ))}
         
-          <button onClick={handleNextPage}>
+          <button onClick={() => handleNextPage()}>
             carrega mais
           </button>
 
@@ -111,7 +115,7 @@ export const getStaticProps: GetStaticProps = async () => {
   );
   
 
-  console.log(postsResponse)
+  // console.log(postsResponse)
 
   const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
     // console.log(JSON.stringify(content[0].body, null, 2))
