@@ -12,7 +12,6 @@ import styles from './home.module.scss';
 import Prismic from '@prismicio/client'
 import Link from 'next/link';
 import { RichText } from 'prismic-dom';
-import { asLink } from '@prismicio/react/node_modules/@prismicio/helpers';
 
 interface Post {
   uid?: string;
@@ -48,35 +47,24 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home({postsPagination}: HomeProps) {  
-  const formattedPost = postsPagination.results.map(post => {
-    // const readTime = getReadTime(post);
+export function formatDate(date: string): string {
+  const formattedDate = format(new Date(date), 'dd  MMM yyyy', {
+    locale: ptBR,
+  });
+  return formattedDate;
+}
 
-    return {
-      ...post,
-      data: {
-        ...post.data,
-      },
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
-    };
-  })
+export default function Home({postsPagination}: HomeProps) { 
+  const { next_page, results } = postsPagination;
 
-  const [ posts, setPosts ] = useState<Post[]>(formattedPost)
-  const [ nextPage, setNextPage ] = useState(postsPagination.next_page)
+  const [ posts, setPosts ] = useState<Post[]>(results)
+  const [ nextPage, setNextPage ] = useState(next_page)
   
-
-
-    async function handleNextPage(): Promise<void> {
-        await fetch(nextPage).then(res => res.json())
-        .then( data => setNextPage(data))
-
-    }
+  async function handleNextPage(): Promise<void> {
+    const response = await (await fetch(nextPage)).json();
+      setNextPage(response.next_page)
+      setPosts([...posts, ...response.results]);
+  }
 
   return (
     <div className={styles.containerHome}>
@@ -86,7 +74,7 @@ export default function Home({postsPagination}: HomeProps) {
               <strong>{post.data.title}</strong>  
               {<p>{post.data.subtitle}</p>}
               <div className={styles.info}>
-                <time><AiOutlineCalendar className={styles.infoCalender}/>{post.first_publication_date}</time>
+                <time><AiOutlineCalendar className={styles.infoCalender}/>{formatDate(post.first_publication_date)}</time>
                 <cite>
                   <FiUser className={styles.infoUser}/>  { post.data.author }
                 </cite> 
@@ -96,9 +84,11 @@ export default function Home({postsPagination}: HomeProps) {
           </Link>
         ))}
         
-          <button onClick={() => handleNextPage()}>
-            carrega mais
-          </button>
+          {nextPage && (
+            <button onClick={handleNextPage}>
+              Carregar mais posts
+            </button>
+          )}
 
     </div>
   )
@@ -107,20 +97,20 @@ export default function Home({postsPagination}: HomeProps) {
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   
-  const postsResponse = await prismic.query<any>(
+  const postsResponse = await prismic.query(
     [Prismic.Predicates.at('document.type', 'posts')],
     {
-      pageSize: 2,
+      pageSize: 1,
     }
   );
   
 
-  // console.log(postsResponse)
-
   const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
-    // console.log(JSON.stringify(content[0].body, null, 2))
     // console.log('Bem sucedido')
+  console.log(JSON.stringify(resultPostPrismic.data, null, 2))
+
     return {
+      
       uid: resultPostPrismic.uid,
       first_publication_date: resultPostPrismic.first_publication_date,
       data: {
@@ -130,11 +120,13 @@ export const getStaticProps: GetStaticProps = async () => {
         content: resultPostPrismic.data.content.map(content => {
           return {
             heading: content.heading,
+            body: [...content.body],
           };
         }),
       },
     }
   })
+
 
   const postsPagination = {
     next_page: postsResponse.next_page,
@@ -142,6 +134,8 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 
 
+
+  console.log(postsPagination)
   return {
     props: {
       postsPagination

@@ -12,6 +12,7 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { FiClock, FiUser } from 'react-icons/fi';
+import { formatDate } from '..';
 
 interface Post {
   uid?: string;
@@ -37,18 +38,10 @@ interface PostProps {
 
 export default function Post( {resultsPosts}:PostProps ) {
 
-const formatData = format(
-  new Date(resultsPosts.first_publication_date),
-  'dd MMM yyyy',
-  {
-    locale: ptBR,
-  }
-)
-
   return (
     <>
       <div className={styles.banner}>
-        <img src={resultsPosts.data.banner.url} alt="" />
+        <img src={resultsPosts.data.banner.url} alt="Banner" />
       </div>
       <div className={styles.ConteinerPosts}>
 
@@ -57,7 +50,7 @@ const formatData = format(
           <header>
             <strong>{resultsPosts.data.title}</strong>
             <div className={styles.Infos}>
-              <time><AiOutlineCalendar className={styles.icons}/>{formatData}</time>
+              <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
               <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
               <p><FiClock className={styles.icons}/> 4 min</p>
             </div>
