@@ -117,12 +117,6 @@ export const getStaticProps: GetStaticProps = async () => {
         title: resultPostPrismic.data.title,
         subtitle: resultPostPrismic.data.subtitle,
         author: resultPostPrismic.data.author,
-        content: resultPostPrismic.data.content.map(content => {
-          return {
-            heading: content.heading,
-            body: [...content.body],
-          };
-        }),
       },
     }
   })

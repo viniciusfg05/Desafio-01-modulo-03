@@ -13,9 +13,10 @@ import styles from './post.module.scss';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { FiClock, FiUser } from 'react-icons/fi';
 import { formatDate } from '..';
+import router from 'next/router';
 
 interface Post {
-  uid?: string;
+  uid?: string | null;
   first_publication_date: string | null;
   data: {
     title: string;
@@ -36,42 +37,48 @@ interface PostProps {
   resultsPosts: Post;
 }
 
-export default function Post( {resultsPosts}:PostProps ) {
+export default function Post( {resultsPosts}:PostProps ): JSX.Element {
+  const fallback = false
 
   return (
     <>
-      <div className={styles.banner}>
-        <img src={resultsPosts.data.banner.url} alt="Banner" />
-      </div>
-      <div className={styles.ConteinerPosts}>
+      {fallback ? (
+        <p>Carregando...</p>
+      ) : (
+        <>
+          <div className={styles.banner}>
+            <img src={resultsPosts.data.banner.url} alt="Banner" />
+          </div>
+          <div className={styles.ConteinerPosts}>
+            <main className={styles.ContentMain}>
+              <header>
+                <strong>{resultsPosts.data.title}</strong>
+                <div className={styles.Infos}>
+                  <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
+                  <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
+                  <p><FiClock className={styles.icons}/> 4 min</p>
+                </div>
+              </header>
 
+              <section>
+                {resultsPosts.data.content.map(post => (
+                    <div key={resultsPosts.uid} className={styles.contentSection}>
+                      <article>{post.heading}</article>
+                
+                      <div 
+                        className={styles.body}
+                        dangerouslySetInnerHTML={{
+                          __html: RichText.asHtml(post.body)}}
+                      />
 
-        <main className={styles.ContentMain}>
-          <header>
-            <strong>{resultsPosts.data.title}</strong>
-            <div className={styles.Infos}>
-              <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
-              <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
-              <p><FiClock className={styles.icons}/> 4 min</p>
-            </div>
-          </header>
-
-          <section>
-            {resultsPosts.data.content.map(content => {
-              return (
-                <div key={resultsPosts.uid} className={styles.contentSection}>
-                  <article>{content.heading}</article>
-                  <div 
-                    className={styles.body}
-                    dangerouslySetInnerHTML={{
-                      __html: RichText.asHtml(content.body)}}
-                  />
-              </div>
-              )
-            })}
-          </section>
-        </main>
-      </div>
+                    </div>
+                ))}
+              </section>
+            </main>
+          </div>
+        </>
+      )}
+      
     </>
 
   )
@@ -93,7 +100,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: true,
+    fallback: 'blocking',
   };
 };
 
@@ -120,9 +127,8 @@ const posts = {
   }
 }
 
-// console.log(JSON.stringify(posts, null, 2))
-
 return {  
-  props: { resultsPosts: posts },
+  props: { post: response },
+  revalidate: 10,
 }
 };
