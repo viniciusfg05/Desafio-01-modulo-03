@@ -29,15 +29,6 @@ interface Post {
   };
 }
 
-interface ContentProp {
-  content: {
-    heading: string;
-    body: {
-      text: string;
-    }[];
-  }[];
-}
-
 interface PostPagination {
   next_page: string;
   results: Post[];
@@ -54,18 +45,18 @@ export function formatDate(date: string): string {
   return formattedDate;
 }
 
-export default function Home({postsPagination}: HomeProps) { 
-  const { next_page, results } = postsPagination;
+export default function Home({ postsPagination }: HomeProps) {
 
+  const { next_page, results } = postsPagination;
   const [ posts, setPosts ] = useState<Post[]>(results)
   const [ nextPage, setNextPage ] = useState(next_page)
-  
+
   async function handleNextPage(): Promise<void> {
     const response = await (await fetch(nextPage)).json();
       setNextPage(response.next_page)
       setPosts([...posts, ...response.results]);
   }
-
+  
   return (
     <div className={styles.containerHome}>
         {posts.map(post => (
@@ -97,7 +88,7 @@ export default function Home({postsPagination}: HomeProps) {
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   
-  const postsResponse = await prismic.query(
+  const postsResponse = await prismic.query<any>(
     [Prismic.Predicates.at('document.type', 'posts')],
     {
       pageSize: 1,
@@ -106,23 +97,13 @@ export const getStaticProps: GetStaticProps = async () => {
   
 
   const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
-    // console.log('Bem sucedido')
-  console.log(JSON.stringify(resultPostPrismic.data, null, 2))
-
     return {
-      
       uid: resultPostPrismic.uid,
       first_publication_date: resultPostPrismic.first_publication_date,
       data: {
         title: resultPostPrismic.data.title,
         subtitle: resultPostPrismic.data.subtitle,
         author: resultPostPrismic.data.author,
-        content: resultPostPrismic.data.content.map(content => {
-          return {
-            heading: content.heading,
-            body: [...content.body],
-          };
-        }),
       },
     }
   })

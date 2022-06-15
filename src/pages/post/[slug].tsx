@@ -1,7 +1,7 @@
 import Prismic from '@prismicio/client'
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import { getPrismicClient } from '../../services/prismic';
 
@@ -13,6 +13,7 @@ import styles from './post.module.scss';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { FiClock, FiUser } from 'react-icons/fi';
 import { formatDate } from '..';
+import { useRouter } from 'next/router';
 
 interface Post {
   uid?: string;
@@ -37,41 +38,46 @@ interface PostProps {
 }
 
 export default function Post( {resultsPosts}:PostProps ) {
-
+  const router = useRouter();
+  
   return (
     <>
-      <div className={styles.banner}>
-        <img src={resultsPosts.data.banner.url} alt="Banner" />
-      </div>
-      <div className={styles.ConteinerPosts}>
-
-
-        <main className={styles.ContentMain}>
-          <header>
-            <strong>{resultsPosts.data.title}</strong>
-            <div className={styles.Infos}>
-              <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
-              <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
-              <p><FiClock className={styles.icons}/> 4 min</p>
-            </div>
-          </header>
-
-          <section>
-            {resultsPosts.data.content.map(content => {
-              return (
-                <div key={resultsPosts.uid} className={styles.contentSection}>
-                  <article>{content.heading}</article>
-                  <div 
-                    className={styles.body}
-                    dangerouslySetInnerHTML={{
-                      __html: RichText.asHtml(content.body)}}
-                  />
+     {router.isFallback ? (
+      <div>Carregando...</div>
+     ) : (
+      <>
+        <div className={styles.banner}>
+          <img src={resultsPosts.data.banner.url} alt={resultsPosts.data.title} />
+        </div>
+        <div className={styles.ConteinerPosts}>
+          <main className={styles.ContentMain}>
+            <header>
+              <strong>{resultsPosts.data.title}</strong>
+              <div className={styles.Infos}>
+                <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
+                <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
+                <p><FiClock className={styles.icons}/> 4 min</p>
               </div>
-              )
-            })}
-          </section>
-        </main>
-      </div>
+            </header>
+            <section>
+              {resultsPosts.data.content.map(content => {
+                return (
+                  <div key={resultsPosts.uid} className={styles.contentSection}>
+                    <article>{content.heading}</article>
+                    <div 
+                      className={styles.body}
+                      dangerouslySetInnerHTML={{
+                        __html: RichText.asHtml(content.body)}}
+                    />
+                </div>
+                )
+              })}
+            </section>
+          </main>
+        </div>
+      </>
+     )}
+      
     </>
 
   )
@@ -100,29 +106,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async context => {
 const prismic = getPrismicClient();
 const { slug } = context.params;
-const response = await prismic.getByUID('posts', String(slug), {})
-
-const posts = {
-  uid: response.uid,
-  first_publication_date: response.first_publication_date,
-  data: {
-    title:  response.data.title,
-    banner: {
-      url: response.data.banner.url,
-    },
-    author: response.data.author,
-    content: response.data.content.map(content => {
-      return {
-        heading: content.heading,
-        body: [...content.body],
-      };
-    }),
-  }
-}
-
-// console.log(JSON.stringify(posts, null, 2))
+const response = await prismic.getByUID<any>('posts', String(slug), {})
 
 return {  
-  props: { resultsPosts: posts },
+  props: { resultsPosts: response },
 }
 };
