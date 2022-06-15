@@ -1,10 +1,6 @@
 import Prismic from '@prismicio/client'
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
-<<<<<<< HEAD
-import { Suspense, useState } from 'react';
-=======
->>>>>>> 7251113bdf7a5481b9d4423fc35f81668af17975
 
 import { getPrismicClient } from '../../services/prismic';
 
@@ -37,50 +33,6 @@ interface PostProps {
   post: Post;
 }
 
-<<<<<<< HEAD
-export default function Post( {resultsPosts}:PostProps ) {
-  const router = useRouter();
-  
-  return (
-    <>
-     {router.isFallback ? (
-      <div>Carregando...</div>
-     ) : (
-      <>
-        <div className={styles.banner}>
-          <img src={resultsPosts.data.banner.url} alt={resultsPosts.data.title} />
-        </div>
-        <div className={styles.ConteinerPosts}>
-          <main className={styles.ContentMain}>
-            <header>
-              <strong>{resultsPosts.data.title}</strong>
-              <div className={styles.Infos}>
-                <time><AiOutlineCalendar className={styles.icons}/>{formatDate(resultsPosts.first_publication_date)}</time>
-                <cite><FiUser className={styles.icons}/>{resultsPosts.data.author}</cite>
-                <p><FiClock className={styles.icons}/> 4 min</p>
-              </div>
-            </header>
-            <section>
-              {resultsPosts.data.content.map(content => {
-                return (
-                  <div key={resultsPosts.uid} className={styles.contentSection}>
-                    <article>{content.heading}</article>
-                    <div 
-                      className={styles.body}
-                      dangerouslySetInnerHTML={{
-                        __html: RichText.asHtml(content.body)}}
-                    />
-                </div>
-                )
-              })}
-            </section>
-          </main>
-        </div>
-      </>
-     )}
-      
-    </>
-=======
 export default function Post( {post}:PostProps ): JSX.Element {
   const router = useRouter()
 
@@ -103,7 +55,6 @@ export default function Post( {post}:PostProps ): JSX.Element {
                   <p><FiClock className={styles.icons}/> 4 min</p>
                 </div>
               </header>
->>>>>>> 7251113bdf7a5481b9d4423fc35f81668af17975
 
               <section>
                 {post.data.content.map(results => (
@@ -146,17 +97,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async context => {
 const prismic = getPrismicClient();
 const { slug } = context.params;
-<<<<<<< HEAD
-const response = await prismic.getByUID<any>('posts', String(slug), {})
-
-return {  
-  props: { resultsPosts: response },
-=======
 const response = await prismic.getByUID('posts', String(slug), {})
 
 return {  
   props: { post: response },
   revalidate: 10,
->>>>>>> 7251113bdf7a5481b9d4423fc35f81668af17975
 }
 };
