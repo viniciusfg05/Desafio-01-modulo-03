@@ -86,17 +86,14 @@ export default function Home({ postsPagination }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const prismic = getPrismicClient();
+  const prismic = getPrismicClient({});
   
-  const postsResponse = await prismic.query<any>(
-    [Prismic.Predicates.at('document.type', 'posts')],
-    {
-      pageSize: 1,
-    }
-  );
+  const posts = await prismic.getByType('posts', {
+    lang: 'pt-BR',
+  });
   
 
-  const mapPostsResults = postsResponse.results.map(resultPostPrismic => {
+  const mapPostsResults = posts.results.map(resultPostPrismic => {
     return {
       uid: resultPostPrismic.uid,
       first_publication_date: resultPostPrismic.first_publication_date,
@@ -110,13 +107,10 @@ export const getStaticProps: GetStaticProps = async () => {
 
 
   const postsPagination = {
-    next_page: postsResponse.next_page,
+    next_page: posts.next_page,
     results: mapPostsResults
   }
 
-
-
-  console.log(postsPagination)
   return {
     props: {
       postsPagination
